@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-psd2
+  labels:
+    app: auth-psd2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: auth-psd2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 3
+  template:
+    metadata:
+      labels:
+        app: auth-psd2
+    spec:
+      containers:
+        - name: auth-psd2
+          image: shunyaoteo99/auth_psd2
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: auth-configmap
+            - secretRef:
+                name: auth-secret

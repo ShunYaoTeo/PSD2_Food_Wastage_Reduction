@@ -44,7 +44,9 @@ def validate():
 
     if not encoded_jwt:
         return "missing credentials", 401
+    
 
+    #Authorization: Bearer [Token]
     encoded_jwt = encoded_jwt.split(" ")[1]
     print(encoded_jwt)
     try:
