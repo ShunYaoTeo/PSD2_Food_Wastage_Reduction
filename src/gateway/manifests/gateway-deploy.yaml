@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-psd2
+  labels:
+    app: gateway-psd2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gateway-psd2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 3
+  template:
+    metadata:
+      labels:
+        app: gateway-psd2
+    spec:
+      containers:
+        - name: gateway-psd2
+          image: shunyaoteo99/gateway_psd2
+          envFrom:
+            - configMapRef:
+                name: gateway-configmap
+            - secretRef:
+                name: gateway-secret
+
