@@ -1,4 +1,4 @@
-CREATE USER 'auth_user'@'localhost' IDENTIFIED BY 'Auth123';
+CREATE USER 'psd2_user'@'localhost' IDENTIFIED BY 'Auth123';
 
 CREATE DATABASE auth;
 
