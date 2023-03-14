@@ -13,6 +13,7 @@ server.config["MYSQL_DB"] = os.environ.get("MYSQL_DB")
 server.config["MYSQL_PORT"] = int(os.environ.get("MYSQL_PORT"))
 
 
+
 @server.route("/login", methods=["POST"])
 def login():
     auth = request.authorization
@@ -20,20 +21,23 @@ def login():
         return "missing credentials", 401
 
     # check db for username and password
+    if not mysql.connection:
+        raise ValueError("MySQL connection not established")
     cur = mysql.connection.cursor()
     res = cur.execute(
-            "SELECT email, password FROM user WHERE email=%s", (auth.username,)
+            "SELECT email, password, admin FROM user WHERE email=%s", (auth.username,)
         )
     
     if res > 0:
         user_row = cur.fetchone()
         email = user_row[0]
         password = user_row[1]
+        admin = user_row[2]
 
         if auth.username != email or auth.password != password:
             return "invaid credentials", 401
         else:
-            return createJWT(auth.username, os.environ.get("JWT_SECRET"), True)
+            return createJWT(auth.username, os.environ.get("JWT_SECRET"), admin)
     else:
         return "invalid credentials", 401
 
