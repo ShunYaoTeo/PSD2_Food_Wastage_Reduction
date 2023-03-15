@@ -63,7 +63,39 @@ def validate():
 
     return decoded, 200
 
+@server.route("/correlation_Response", methods=["POST"])
+def corr_Response():
+    if not mysql.connection:
+        raise ValueError("MySQL connection not established")
 
+    coorelation_id = request.json["properties"]
+    
+    cursor = mysql.connection.cursor()
+    res = cursor.execute(
+        "SELECT * FROM correlation_ids WHERE correlation_id=%s", (coorelation_id,)
+    )
+    if res > 0:
+        cursor.execute(
+            "DELETE FROM correlation_ids WHERE correlation_id=%s", (coorelation_id,)
+        )
+        mysql.connection.commit()
+        return "correlation_id exists!", 200
+    else:
+        return "correlation_id not found", 401
+    
+@server.route("/store_correlation", methods=["POST"])
+def store_correlation():
+    if not mysql.connection:
+        raise ValueError("MySQL connection not established")
+
+    coorelation_id = request.json["properties"]
+    cursor = mysql.connection.cursor()
+    cursor.execute(
+        f"INSERT INTO correlation_ids (correlation_id, request_type) VALUES ('{coorelation_id}', 'foodwaste')"
+    )
+    mysql.connection.commit()
+
+    return "[*AUTH_SERVICE] Stored Correlation_id to DB", 200
 
 # authz = whether user has admin permissions (True/False)
 def createJWT(username, secret, authz):

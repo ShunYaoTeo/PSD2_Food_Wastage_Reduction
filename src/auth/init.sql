@@ -15,6 +15,13 @@ CREATE TABLE IF NOT EXISTS user (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS correlation_ids (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    correlation_id VARCHAR(255) NOT NULL,
+    request_type VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 INSERT INTO user (email, username, password, admin) VALUES ('shunyaoteo99@gmail.com', 'Shun Yao', 'Admin123', true);
 INSERT INTO user (email, username, password, admin) VALUES ('test@test.com', 'tester619', 'test', true);
 INSERT INTO user (email, username, password) VALUES ('haidilao@owner.com', 'HDLowner', 'haidilao');

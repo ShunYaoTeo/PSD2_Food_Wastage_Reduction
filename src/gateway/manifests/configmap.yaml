@@ -4,5 +4,5 @@ metadata:
   name: gateway-configmap
 data:
   AUTH_SVC_ADDRESS: "auth-psd2:5000"
-  FOOD_WASTE_GATEWAY_QUEUE: "foodwaste_gateway"
-  FOOD_WASTE_FOODWASTE_QUEUE: "foodwaste_foodwaste"
+  GATEWAY_FOODWASTE_QUEUE: "gateway_foodwaste"
+  REWARD_GATEWAY_QUEUE: "reward_gateway"

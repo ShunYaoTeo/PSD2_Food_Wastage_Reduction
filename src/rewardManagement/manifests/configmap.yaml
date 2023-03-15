@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: reward-configmap
+data:
+  MYSQL_HOST: host.minikube.internal
+  MYSQL_USER: psd2_user
+  MYSQL_DB: rewards
+  MYSQL_PORT: "3306"
+  FOODWASTE_REWARD_QUEUE: "foodwaste_reward"
+  REWARD_GATEWAY_QUEUE: "reward_gateway"
+  REWARDS_SVC_ADDRESS: "reward-psd2:9000"

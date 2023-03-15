@@ -7,6 +7,6 @@ data:
   MYSQL_USER: psd2_user
   MYSQL_DB: foodwaste
   MYSQL_PORT: "3306"
-  FOOD_WASTE_GATEWAY_QUEUE: "foodwaste_gateway"
-  FOOD_WASTE_FOODWASTE_QUEUE: "foodwaste_foodwaste"
+  GATEWAY_FOODWASTE_QUEUE: "gateway_foodwaste"
+  FOODWASTE_REWARD_QUEUE: "foodwaste_reward"
   FOODWASTE_SVC_ADDRESS: "foodwaste-psd2:8000"

@@ -1,4 +1,4 @@
-import os, pika, json, uuid, sys
+import os, pika, json, uuid, sys, requests
 from flask import Flask, request
 from flask_cors import CORS
 from auth_svc import access
@@ -13,8 +13,8 @@ CORS(server)
 connection = pika.BlockingConnection(pika.ConnectionParameters("rabbitmq"))
 channel = connection.channel()
 
-manager = Manager()        
-correlation_id_dict = manager.dict()
+# manager = Manager()        
+# correlation_id_dict = manager.dict()
 
 @server.route("/login", methods=["POST"])
 def login():
@@ -36,13 +36,21 @@ def food_waste():
         return err
     
     correlation_id = str(uuid.uuid4())
-    print("[*Gateway Service] Correlation_id generated: %s", correlation_id)
-    with lock:
-        correlation_id_dict.update({correlation_id:None})
-        print(correlation_id_dict.keys())
-    err = util.upload(channel, request, "foodwaste_gateway", correlation_id)
-    if err:
-        print("upload failed: ", err)
+    print(f"[*Gateway Service] Correlation_id generated: {correlation_id}")
+    # with lock:
+    #     correlation_id_dict.update({correlation_id:None})
+    #     print(correlation_id_dict.keys())
+    response = requests.post(
+            f"http://{os.environ.get('AUTH_SVC_ADDRESS')}/store_correlation",
+            json={"properties": correlation_id}
+        )
+    
+    if response.status_code == 200:
+        err = util.upload(channel, request, "gateway_foodwaste", correlation_id)
+        if err:
+            print("upload failed: ", err)
+    else:
+        return "[*Gateway Service] Store Correlation Failed", 401
 
     return "success!", 200
    
@@ -83,6 +91,7 @@ def validateCheck():
     
     return "Pass"
 
+
 ##########
 # For admin functions:
 #
@@ -98,28 +107,40 @@ def validateCheck():
 def consume():
    
     def on_response(ch, method, props, body):
-        correlation_id = props.correlation_id
-        print("[*GATEWAY_SERVICE] Correlation id : %s \n Keys: ", (correlation_id))
-        with lock:
-            print(correlation_id_dict.keys())
-            # Check if the correlation ID matches any of the stored correlation IDs
-            if correlation_id in correlation_id_dict:
+        # correlation_id = props.correlation_id
+        # print(f"[*GATEWAY_SERVICE] Correlation id : {correlation_id} \n Keys: ")
+        # with lock:
+        #     print(correlation_id_dict.keys())
+        #     # Check if the correlation ID matches any of the stored correlation IDs
+        #     if correlation_id in correlation_id_dict:
                 
-                del correlation_id_dict[correlation_id]
-                message = json.loads(body)
-                print("[*GATEWAY_SERVICE] Correlation id matched! Retreving message body...")
-                print(message)
-                ch.basic_ack(delivery_tag=method.delivery_tag)
-                return message
+        #         del correlation_id_dict[correlation_id]
+        #         message = json.loads(body)
+        #         print("[*GATEWAY_SERVICE] Correlation id matched! Retreving message body...")
+        #         print(message)
+        #         ch.basic_ack(delivery_tag=method.delivery_tag)
+        #         return message
             
-            else:
-                print("[*GATEWAY_SERVICE] Correlation id not match!")
-                ch.basic_nack(delivery_tag=method.delivery_tag)
-                return 0
-
+        #     else:
+        #         print("[*GATEWAY_SERVICE] Correlation id not match! Message Ignored")
+        #         ch.basic_ack(delivery_tag=method.delivery_tag)
+        #         return 0
+        response = requests.post(
+            f"http://{os.environ.get('AUTH_SVC_ADDRESS')}/correlation_Response",
+            json={"properties": props.correlation_id}
+        )
+        if response.status_code == 200:
+            message = json.loads(body)
+            print("[*GATEWAY_SERVICE] Correlation id matched! Retreving message body...")
+            print(message)
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+            return message
+        else: 
+            print("[*GATEWAY_SERVICE] Correlation id not match! Message Ignored")
+            ch.basic_ack(delivery_tag=method.delivery_tag)
 
     channel.basic_consume(
-        queue = os.environ.get("FOOD_WASTE_FOODWASTE_QUEUE"),
+        queue = os.environ.get("REWARD_GATEWAY_QUEUE"),
         on_message_callback=on_response
     )
 

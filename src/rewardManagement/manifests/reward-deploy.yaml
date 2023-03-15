@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reward-psd2
+  labels: 
+    app: reward-psd2
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: reward-psd2
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 8
+  template:
+    metadata:
+      labels:
+        app: reward-psd2
+    spec:
+      containers:
+        - name: reward-psd2
+          image: shunyaoteo99/reward_psd2
+          ports:
+            - containerPort: 9000
+          envFrom:
+            - configMapRef:
+                name: reward-configmap
+            - secretRef:
+                name: reward-secret

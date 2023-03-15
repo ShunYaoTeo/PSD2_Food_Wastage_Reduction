@@ -30,12 +30,14 @@ def getWeight():
     properties = request.json["properties"]
     
     err = getFoodWasteWeight.getWeight(body, mysql, channel, properties)
+    
     if err:
         return err
     else:
         return "success!", 200
 
 def main():
+
     def food_waste_callback(ch, method, properties,body):
         print("[*Food_Waste_Service] Request Recieved!")
         response = requests.post(
@@ -44,17 +46,17 @@ def main():
                   "properties": properties.correlation_id}
         )
         if response.status_code == 200:
-            print("!! getWeight received")
+            print("[*Food_Waste_Service]!! getWeight received")
             ch.basic_ack(delivery_tag=method.delivery_tag)
-            return "!! getWeight received"
+            return "[*Food_Waste_Service]!! getWeight received"
         else:
-            print("!! getWeight failed")
+            print("[*Food_Waste_Service]!! getWeight failed")
             ch.basic_nack(delivery_tag=method.delivery_tag)
-            return "!! getWeight failed"
+            return "[*Food_Waste_Service]!! getWeight failed"
 
 
     channel.basic_consume(
-        queue=os.environ.get("FOOD_WASTE_GATEWAY_QUEUE"), 
+        queue=os.environ.get("GATEWAY_FOODWASTE_QUEUE"), 
         on_message_callback=food_waste_callback
     )
 
@@ -69,6 +71,9 @@ if __name__ == "__main__":
         
         server_process.start()
         consumer_process.start()
+
+        server_process.join()
+        consumer_process.join()
     except KeyboardInterrupt:
         print("Interupted")
         try: 

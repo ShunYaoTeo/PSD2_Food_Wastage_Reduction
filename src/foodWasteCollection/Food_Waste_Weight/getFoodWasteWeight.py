@@ -55,17 +55,34 @@ def getWeight(message, mysql, channel, properties):
         "foodWeight": formattedData
     }
 
+    # #Publish message back to gateway service
+    # try:
+    #     channel.basic_publish(
+    #         exchange="",
+    #         routing_key=os.environ.get("FOOD_WASTE_FOODWASTE_QUEUE"),
+    #         body=json.dumps(reply_message),
+    #         properties = pika.BasicProperties(
+    #         delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE,
+    #         correlation_id=properties
+    #         )
+    #     )
+    #     print("[*Food_Waste_Service] Reply back to GATEWAY with Correlation ID: ", properties)
+    #     print("[*Food_Waste_Service] Reply message sent!")
+    # except Exception as err:
+    #     return "[*Food_Waste_Service] Failed to Publish Reply Message to Gateway Service"
+    
+    #Publish message to reward service
     try:
         channel.basic_publish(
             exchange="",
-            routing_key="foodwaste_foodwaste",
+            routing_key=os.environ.get("FOODWASTE_REWARD_QUEUE"),
             body=json.dumps(reply_message),
             properties = pika.BasicProperties(
             delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE,
             correlation_id=properties
             )
         )
-        print("[*Food_Waste_Service] Reply Correlation ID: %s", properties)
-        print("[*Food_Waste_Service] Reply message sent!")
+        print("[*Food_Waste_Service] Sends Message to Rewards Service")
+        print("[*Food_Waste_Service] Message sent!")
     except Exception as err:
-        return "[*Food_Waste_Service] Failed to Publish Reply Message"
+        return "[*Food_Waste_Service] Failed to Publish Request Message to Rewards Service"
