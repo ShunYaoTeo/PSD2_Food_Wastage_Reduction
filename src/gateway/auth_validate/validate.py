@@ -16,9 +16,9 @@ def token(request):
         )
     
     if response.status_code == 200:
-        print("!! token(request) passed")
+        print("[*AUTH SERVICE] token(request) passed")
         return response.text, None
     else:
-        print("!! token(request) failed")
+        print("[*AUTH SERVICE] token(request) failed")
         return None, (response.text, response.status_code)
 

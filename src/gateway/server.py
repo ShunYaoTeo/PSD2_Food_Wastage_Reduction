@@ -32,7 +32,7 @@ def food_waste():
     print("access: ", access, ", err: ", err)
 
     if err:
-        print("valid.token.(request) failed: ", err)
+        print("[*Gateway Service] validation failed: ", err)
         return err
     
     correlation_id = str(uuid.uuid4())
@@ -48,12 +48,155 @@ def food_waste():
     if response.status_code == 200:
         err = util.upload(channel, request, "gateway_foodwaste", correlation_id)
         if err:
-            print("upload failed: ", err)
+            print("[*Gateway Service] upload failed: ", err)
     else:
         return "[*Gateway Service] Store Correlation Failed", 401
 
     return "success!", 200
    
+@server.route("/food-waste-by-category", methods = ["GET"])
+def getFoodWasteByCategory():
+    #Checking Validation of User's JWT
+    access, err = validate.token(request)
+    if err:
+        print("[*Gateway Service] valid.token.(request) failed: ", err)
+        return err
+    access = json.loads(access)
+    userEmail = access['username']
+    if not userEmail:
+        return "[*Gateway Service] User Email not provided", 400
+
+    response = requests.get(
+        f"http://{os.environ.get('FOODWASTE_SVC_ADDRESS')}/food-waste-by-category",
+        headers={"userEmail": userEmail},
+    )
+    return response.content
+
+@server.route("/food-waste-trends", methods = ["GET"])
+def getFoodWasteTrends():
+    access, err = validate.token(request)
+    if err:
+        print("[*Gateway Service] valid.token.(request) failed: ", err)
+        return err
+    access = json.loads(access)
+    userEmail = access['username']
+    if not userEmail:
+        return "[*Gateway Service] User Email not provided", 400
+
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    response = requests.get(
+        f"http://{os.environ.get('FOODWASTE_SVC_ADDRESS')}/food-waste-trends",
+        headers={"userEmail": userEmail},
+        params={'start_date': start_date, 'end_date': end_date}
+    )
+    return response.content
+
+@server.route("/compare-food-waste", methods = ["GET"])
+def compareFoodWaste():
+    # Checking Validation of User's JWT
+    access, err = validate.token(request)
+    if err:
+        print("[*Gateway Service] valid.token.(request) failed: ", err)
+        return err
+    access = json.loads(access)
+    userEmail = access['username']
+    if not userEmail:
+        return "[*Gateway Service] User Email not provided", 400
+
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+
+    response = requests.get(
+        f"http://{os.environ.get('FOODWASTE_SVC_ADDRESS')}/compare-food-waste",
+        headers={"userEmail": userEmail},
+        params={"start_date": start_date, "end_date": end_date}
+    )
+    return response.content
+
+@server.route("/top-food-waste-contributors", methods = ["GET"])
+def topFoodWasteContributors():
+    # Checking Validation of User's JWT
+    access, err = validate.token(request)
+    if err:
+        print("[*Gateway Service] valid.token.(request) failed: ", err)
+        return err
+    access = json.loads(access)
+    userEmail = access['username']
+    if not userEmail:
+        return "[*Gateway Service] User Email not provided", 400
+
+    response = requests.get(
+        f"http://{os.environ.get('FOODWASTE_SVC_ADDRESS')}/top-food-waste-contributors",
+        headers={"userEmail": userEmail},
+    )
+    return response.content
+
+@server.route("/waste-reduction-progress", methods = ["GET"])
+def getWasteReductionProgress():
+    # Checking Validation of User's JWT
+    access, err = validate.token(request)
+    if err:
+        print("[*Gateway Service] valid.token.(request) failed: ", err)
+        return err
+    access = json.loads(access)
+    userEmail = access['username']
+    if not userEmail:
+        return "[*Gateway Service] User Email not provided", 400
+
+    old_start_date = request.args.get('old_start_date')
+    old_end_date = request.args.get('old_end_date')
+    new_start_date = request.args.get('new_start_date')
+    new_end_date = request.args.get('new_end_date')
+
+    response = requests.get(
+        f"http://{os.environ.get('FOODWASTE_SVC_ADDRESS')}/waste-reduction-progress",
+        headers={"userEmail": userEmail},
+        params={"old_start_date": old_start_date, "old_end_date": old_end_date, "new_start_date": new_start_date, "new_end_date": new_end_date }
+    )
+    return response.content
+
+@server.route("/points-earned-over-time", methods = ["GET"])
+def getPointsEarnedOverTime():
+    # Checking Validation of User's JWT
+    access, err = validate.token(request)
+    if err:
+        print("[*Gateway Service] valid.token.(request) failed: ", err)
+        return err
+    access = json.loads(access)
+    userEmail = access['username']
+    if not userEmail:
+        return "[*Gateway Service] User Email not provided", 400
+
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+    aggregation = request.args.get("aggregation")
+
+    response = requests.get(
+        f"http://{os.environ.get('REWARDS_SVC_ADDRESS')}/points-earned-over-time",
+        headers={"userEmail": userEmail},
+        params={"start_date": start_date, "end_date": end_date, "aggregation": aggregation}
+    )
+    return response.content
+
+@server.route("/rewards-status", methods = ["GET"])
+def getRewardsStatus():
+    # Checking Validation of User's JWT
+    access, err = validate.token(request)
+    if err:
+        print("[*Gateway Service] valid.token.(request) failed: ", err)
+        return err
+    access = json.loads(access)
+    userEmail = access['username']
+    if not userEmail:
+        return "[*Gateway Service] User Email not provided", 400
+
+    response = requests.get(
+        f"http://{os.environ.get('REWARDS_SVC_ADDRESS')}/rewards-status",
+        headers={"userEmail": userEmail}
+    )
+    return response.content
 
 
 @server.route("/rewards", methods=["POST"])
@@ -62,7 +205,7 @@ def rewards():
     print("access: ", access, ", err: ", err)
 
     if err:
-        print("valid.token.(request) failed: ", err)
+        print("[*Gateway Service] validation failed: ", err)
         return err
     
     access = json.loads(access)
@@ -90,6 +233,7 @@ def validateCheck():
         return "Fail"
     
     return "Pass"
+
 
 
 ##########

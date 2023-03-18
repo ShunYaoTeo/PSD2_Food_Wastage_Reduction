@@ -1,5 +1,5 @@
 import pika, sys, os, requests
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
 from multiprocessing import Process
 from addPoints import addPoints
@@ -19,8 +19,98 @@ connection = pika.BlockingConnection(
 )
 channel = connection.channel()
 
+def getUserID(userEmail):
+    cursor = mysql.connection.cursor()
+    res = cursor.execute(
+        f"SELECT id FROM auth.user WHERE email = '{userEmail}'"
+    )
+    if res > 0:
+        userID = cursor.fetchone()
+        return userID[0]
+    else:
+        return None
 
-@server.route("/getPoints",methods = ["POST"])
+def getPointsOverTimeJson(userID, start_date, end_date, aggregation):
+    if aggregation == "daily":
+        group_by = "DATE(created_at)"
+    elif aggregation == "weekly":
+        group_by = "YEARWEEK(created_at)"
+    elif aggregation == "monthly":
+        group_by = "EXTRACT(YEAR_MONTH FROM created_at)"
+    else:
+        raise ValueError("Invalid aggregation type")
+    
+    cursor = mysql.connection.cursor()
+    res = cursor.execute(f'''SELECT {group_by} as period, SUM(points) as total_points
+                             FROM user_points
+                             WHERE user_id = {userID} AND created_at >= '{start_date}' 
+                             AND created_at < DATE_ADD('{end_date}', INTERVAL 1 DAY)
+                             GROUP BY {group_by}
+                             ORDER BY period'''
+                        )
+    if res > 0:
+        rows = cursor.fetchall()
+        data = [{'period': row[0], 'points': row[1]} for row in rows]
+        return data
+    else:
+        return []
+    
+def getRewardsStatusJson(user_id):
+    cursor = mysql.connection.cursor()
+
+    # Get the user's rewards points
+    res = cursor.execute("SELECT points FROM rewards.user_points WHERE user_id = %s", (user_id,))
+    if res > 0:
+        user_points = cursor.fetchone()[0]
+    else:
+        user_points = 0
+
+    # Get the list of available rewards
+    res = cursor.execute("SELECT id, name, point_value, description FROM rewards.rewards")
+    if res > 0:
+        rows = cursor.fetchall()
+        available_rewards = [{"id": row[0], "name": row[1], "point_value": row[2], "description": row[3]} for row in rows]
+    else:
+        available_rewards = []
+
+    return {
+        "user_points": user_points,
+        "available_rewards": available_rewards
+    }
+    
+    
+@server.route("/points-earned-over-time", methods = ["GET"])
+def getPointsOverTime():
+    if not mysql.connection:
+        raise ValueError("MySQL connection not established")
+
+    userEmail = request.headers.get("userEmail")
+    userID = getUserID(userEmail)
+    if userID is None:
+        return "[*Rewards_Service] No User Found", 400
+
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    aggregation = request.args.get("aggregation", "daily")
+
+    data = getPointsOverTimeJson(userID, start_date, end_date, aggregation)
+    return jsonify(data), 200
+
+
+@server.route("/rewards-status", methods=["GET"])
+def getRewardsStatus():
+    userEmail = request.headers.get("userEmail")
+    user_id = getUserID(userEmail)
+
+    if user_id is None:
+        return "[*Rewards_Service] No User Found", 400
+
+    rewards_data = getRewardsStatusJson(user_id)
+    return jsonify(rewards_data), 200
+
+
+
+@server.route("/addPoints",methods = ["POST"])
 def getPoints():
     if not mysql.connection:
         raise ValueError("MySQL connection not established")
@@ -34,24 +124,27 @@ def getPoints():
         return err
     else:
         return "success!", 200
+    
+
+
 
 def main():
 
     def reward_callback(ch, method, properties, body):
         print("[*Rewards_Service] Request Recieved!")
         response = requests.post(
-            f"http://{os.environ.get('REWARDS_SVC_ADDRESS')}/getPoints",
+            f"http://{os.environ.get('REWARDS_SVC_ADDRESS')}/addPoints",
             json={"body": body.decode(),
                   "properties": properties.correlation_id}
         )
         if response.status_code == 200:
-            print("[*Rewards_Service]!! getPoints received")
+            print("[*Rewards_Service]!! addPoints received")
             ch.basic_ack(delivery_tag=method.delivery_tag)
-            return "[*Rewards_Service]!! getPoints received"
+            return "[*Rewards_Service]!! addPoints received"
         else:
-            print("[*Rewards_Service]!! getPoints failed")
+            print("[*Rewards_Service]!! addPoints failed")
             ch.basic_nack(delivery_tag=method.delivery_tag)
-            return "[*Rewards_Service]!! getPoints failed"
+            return "[*Rewards_Service]!! addPoints failed"
 
 
 

@@ -29,6 +29,6 @@ CREATE TABLE IF NOT EXISTS user_reward (
 
 INSERT INTO rewards (name, point_value, description) VALUES 
 ("$10 Voucher", 30, "$10 Capitaland Voucher"),
-("$20 Voucher", 50, "$10 Capitaland Voucher"),
-("$30 Voucher", 70, "$10 Capitaland Voucher"),
-("$40 Voucher", 100, "$10 Capitaland Voucher");
+("$20 Voucher", 50, "$20 Capitaland Voucher"),
+("$30 Voucher", 70, "$30 Capitaland Voucher"),
+("$40 Voucher", 100, "$40 Capitaland Voucher");

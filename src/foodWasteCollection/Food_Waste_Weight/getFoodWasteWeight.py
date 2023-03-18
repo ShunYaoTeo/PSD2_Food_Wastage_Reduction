@@ -1,4 +1,4 @@
-import pika, json, os, random
+import pika, json, os, random, requests
 
 def getWeight(message, mysql, channel, properties):
 
@@ -27,6 +27,14 @@ def getWeight(message, mysql, channel, properties):
     tempData = random.randint(1, 50)
     formattedData= float(tempData)
 
+
+    # response = requests.get(
+    #         f"http://{os.environ.get('RASPBERRY_PI_ADDRESS')}/weight",
+    #     )
+    # tempData = response.content
+    # tempData = json.load(tempData)
+    # weight = tempData['weight']
+    # formattedData = float(weight)
     ##############################################################
 
     # Get Restaurant id of User
