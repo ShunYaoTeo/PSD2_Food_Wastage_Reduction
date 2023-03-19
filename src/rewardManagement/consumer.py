@@ -118,7 +118,7 @@ def getPoints():
     body = request.json["body"]
     properties = request.json["properties"]
     
-    err = addPoints.getPoints(body, mysql, channel, properties)
+    err = addPoints.getPoints(body, mysql, properties)
     
     if err:
         return err
@@ -131,21 +131,30 @@ def getPoints():
 def main():
 
     def reward_callback(ch, method, properties, body):
-        print("[*Rewards_Service] Request Recieved!")
+        print("[*REWARDS_SERVICE] Request Recieved!")
+
         response = requests.post(
-            f"http://{os.environ.get('REWARDS_SVC_ADDRESS')}/addPoints",
-            json={"body": body.decode(),
-                  "properties": properties.correlation_id}
+            f"http://{os.environ.get('AUTH_SVC_ADDRESS')}/correlation_Response",
+            json={"properties": properties.correlation_id}
         )
         if response.status_code == 200:
-            print("[*Rewards_Service]!! addPoints received")
-            ch.basic_ack(delivery_tag=method.delivery_tag)
-            return "[*Rewards_Service]!! addPoints received"
+            print("[*REWARDS_SERVICE] Correlation id matched! Updating Database...")
+            response = requests.post(
+                f"http://{os.environ.get('REWARDS_SVC_ADDRESS')}/addPoints",
+                json={"body": body.decode(),
+                    "properties": properties.correlation_id}
+            )
+            if response.status_code == 200:
+                print("[*REWARDS_SERVICE]!! addPoints received")
+                ch.basic_ack(delivery_tag=method.delivery_tag)
+                return "[*REWARDS_SERVICE]!! addPoints received"
+            else:
+                print("[*REWARDS_SERVICE]!! addPoints failed")
+                ch.basic_nack(delivery_tag=method.delivery_tag)
+                return "[*REWARDS_SERVICE]!! addPoints failed"
         else:
-            print("[*Rewards_Service]!! addPoints failed")
-            ch.basic_nack(delivery_tag=method.delivery_tag)
-            return "[*Rewards_Service]!! addPoints failed"
-
+            print("[*REWARDS_SERVICE] Correlation id not match! Message Ignored")
+            ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
     channel.basic_consume(

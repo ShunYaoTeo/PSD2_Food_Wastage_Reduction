@@ -1,10 +1,10 @@
 import pika, json
 
 
-def upload(channel, request, routingKey, correlation_id):
+def upload(channel, request, userEmail, routingKey, correlation_id):
         
     message = {
-        "username": request.form["username"],
+        "username": userEmail,
         "food_type": request.form["food_type"],
         "reason" : request.form["reason"],
         "donated" : request.form["donated"],

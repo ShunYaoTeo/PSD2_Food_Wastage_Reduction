@@ -19,8 +19,8 @@ export const items = [
     )
   },
   {
-    title: 'Customers',
-    path: '/customers',
+    title: 'Record Food Waste',
+    path: '/record-food-waste',
     icon: (
       <SvgIcon fontSize="small">
         <UsersIcon />
@@ -80,5 +80,7 @@ export const items = [
         <XCircleIcon />
       </SvgIcon>
     )
+
+
   }
 ];

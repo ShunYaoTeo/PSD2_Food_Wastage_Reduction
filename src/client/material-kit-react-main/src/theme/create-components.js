@@ -296,6 +296,30 @@ export function createComponents(config) {
       defaultProps: {
         variant: 'filled'
       }
-    }
+    },
+
+    MuiPickersDay: {
+      styleOverrides: {
+        day: {
+          fontSize: 14,
+          fontWeight: 500,
+          lineHeight: '24px',
+          color: palette.text.primary,
+          '&:hover': {
+            backgroundColor: palette.action.hover,
+          },
+        },
+        daySelected: {
+          backgroundColor: palette.primary.main,
+          color: palette.primary.contrastText,
+          '&:hover': {
+            backgroundColor: palette.primary.dark,
+          },
+        },
+        dayDisabled: {
+          color: palette.text.disabled,
+        },
+      },
+    },
   };
 }

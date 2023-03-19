@@ -10,3 +10,4 @@ data:
   FOODWASTE_REWARD_QUEUE: "foodwaste_reward"
   REWARD_GATEWAY_QUEUE: "reward_gateway"
   REWARDS_SVC_ADDRESS: "reward-psd2:9000"
+  AUTH_SVC_ADDRESS: "auth-psd2:5000"

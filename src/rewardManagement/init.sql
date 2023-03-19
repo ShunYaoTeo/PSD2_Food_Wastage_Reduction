@@ -27,6 +27,18 @@ CREATE TABLE IF NOT EXISTS user_reward (
     FOREIGN KEY (reward_id) REFERENCES rewards (id)
 );
 
+CREATE TABLE IF NOT EXISTS user_reward_history (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    reward_id INT,
+    points VARCHAR(255) NOT NULL,
+    action ENUM('earned', 'redeemed', 'adjusted') NOT NULL,
+    description VARCHAR(255),
+    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES auth.user (id),
+    FOREIGN KEY (reward_id) REFERENCES rewards (id)
+);
+
 INSERT INTO rewards (name, point_value, description) VALUES 
 ("$10 Voucher", 30, "$10 Capitaland Voucher"),
 ("$20 Voucher", 50, "$20 Capitaland Voucher"),

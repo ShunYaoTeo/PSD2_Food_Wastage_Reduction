@@ -35,6 +35,8 @@ def food_waste():
         print("[*Gateway Service] validation failed: ", err)
         return err
     
+    access = json.loads(access)
+    userEmail = access['username']
     correlation_id = str(uuid.uuid4())
     print(f"[*Gateway Service] Correlation_id generated: {correlation_id}")
     # with lock:
@@ -46,7 +48,8 @@ def food_waste():
         )
     
     if response.status_code == 200:
-        err = util.upload(channel, request, "gateway_foodwaste", correlation_id)
+        err = util.upload(channel, request, userEmail, "gateway_foodwaste", correlation_id)
+        
         if err:
             print("[*Gateway Service] upload failed: ", err)
     else:
@@ -247,61 +250,10 @@ def validateCheck():
 #########
 
 
-# RABBITMQ message recieve callback functions:
-def consume():
-   
-    def on_response(ch, method, props, body):
-        # correlation_id = props.correlation_id
-        # print(f"[*GATEWAY_SERVICE] Correlation id : {correlation_id} \n Keys: ")
-        # with lock:
-        #     print(correlation_id_dict.keys())
-        #     # Check if the correlation ID matches any of the stored correlation IDs
-        #     if correlation_id in correlation_id_dict:
-                
-        #         del correlation_id_dict[correlation_id]
-        #         message = json.loads(body)
-        #         print("[*GATEWAY_SERVICE] Correlation id matched! Retreving message body...")
-        #         print(message)
-        #         ch.basic_ack(delivery_tag=method.delivery_tag)
-        #         return message
-            
-        #     else:
-        #         print("[*GATEWAY_SERVICE] Correlation id not match! Message Ignored")
-        #         ch.basic_ack(delivery_tag=method.delivery_tag)
-        #         return 0
-        response = requests.post(
-            f"http://{os.environ.get('AUTH_SVC_ADDRESS')}/correlation_Response",
-            json={"properties": props.correlation_id}
-        )
-        if response.status_code == 200:
-            message = json.loads(body)
-            print("[*GATEWAY_SERVICE] Correlation id matched! Retreving message body...")
-            print(message)
-            ch.basic_ack(delivery_tag=method.delivery_tag)
-            return message
-        else: 
-            print("[*GATEWAY_SERVICE] Correlation id not match! Message Ignored")
-            ch.basic_ack(delivery_tag=method.delivery_tag)
-
-    channel.basic_consume(
-        queue = os.environ.get("REWARD_GATEWAY_QUEUE"),
-        on_message_callback=on_response
-    )
-
-    print("Waiting for messages. To exit press CTR + C")
-
-    channel.start_consuming()
 
 if __name__ == "__main__":
     try:
-        server_process = Process(target=server.run, kwargs={'host': '0.0.0.0', 'port': 8080})
-        consumer_process = Process(target=consume)
-        
-        server_process.start()
-        consumer_process.start()
-
-        server_process.join()
-        consumer_process.join()
+        server.run(host='0.0.0.0', port=8080)
     except KeyboardInterrupt:
         print("Interupted")
         try: 

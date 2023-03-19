@@ -1,6 +1,6 @@
 import pika, json, os
 
-def getPoints(message, mysql, channel, properties):
+def getPoints(message, mysql,  properties):
     
     cursor = mysql.connection.cursor()
     message = json.loads(message)
@@ -8,9 +8,9 @@ def getPoints(message, mysql, channel, properties):
     userEmail = message["username"]
     foodType = message["food_type"]
     reason = message["reason"]
-    foodWight = message["foodWeight"]
+    foodWeight = message["foodWeight"]
     donated = message["donated"]
-    if (str(donated) == "false"):
+    if (str(donated) == "false" or str(donated) == '0'):
         donated = 0
     else:
         donated = 1
@@ -34,9 +34,9 @@ def getPoints(message, mysql, channel, properties):
 
     # Calculating amount of points to add to the user
     categoryPoints = rules[foodType]
-    totalPointsGained = categoryPoints * foodWight
+    totalPointsGained = categoryPoints * foodWeight
 
-    print(f"{userEmail} has inserted {foodWight} kg of {foodType} \n")
+    print(f"{userEmail} has inserted {foodWeight} kg of {foodType} \n")
     print(f"Total points gained = {totalPointsGained}\n")
 
     # Updating database with points gained
@@ -44,6 +44,20 @@ def getPoints(message, mysql, channel, properties):
         f"UPDATE user_points SET points = points + {totalPointsGained} WHERE user_id = (SELECT id FROM auth.user WHERE email = '{userEmail}')"
     )
     mysql.connection.commit()
+    print("[*Rewards_Service] User Points Updated")
+
+
+    description = f"Food Waste: {foodType} ({foodWeight}kg) - Reason: {reason} - Donated: {donated}"
+
+    # Updateing user_points_history table
+    cursor.execute(f'''
+            INSERT INTO user_reward_history (user_id, points, action, description) 
+            VALUES ((SELECT id FROM auth.user WHERE email = '{userEmail}'),{totalPointsGained}, 'earned', '{description}')'''
+    )
+    mysql.connection.commit()
+    print("[*Rewards_Service] User Point History Updated")
+
+
     res = cursor.execute(
         f"SELECT points from user_points where user_id = (SELECT id FROM auth.user WHERE email = '{userEmail}')"
     )
@@ -55,29 +69,3 @@ def getPoints(message, mysql, channel, properties):
         return "[*Rewards_Service] ERROR could not find user"
     
 
-    # Sends Updated data back to gateway
-
-    update_message = {
-        "username": userEmail,
-        "food_type": foodType,
-        "reason" : reason,
-        "donated" : donated,
-        "foodWeight": foodWight,
-        "updatedPoints": updatedPoints
-    }
-
-     #Publish message back to gateway service
-    try:
-        channel.basic_publish(
-            exchange="",
-            routing_key=os.environ.get("REWARD_GATEWAY_QUEUE"),
-            body=json.dumps(update_message),
-            properties = pika.BasicProperties(
-            delivery_mode=pika.spec.PERSISTENT_DELIVERY_MODE,
-            correlation_id=properties
-            )
-        )
-        print("[*Rewards_Service] Reply back to GATEWAY with Correlation ID: ", properties)
-        print("[*Rewards_Service] Reply message sent!")
-    except Exception as err:
-        return "[*Rewards_Service] Failed to Publish Reply Message to Gateway Service"

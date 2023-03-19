@@ -82,7 +82,7 @@ def compareFoodWasteJson(restaurant_id, category, start_date, end_date):
     res = cursor.execute(f'''SELECT r.name, r.id, SUM(fw.weight) as total_waste
                              FROM restaurants r
                              JOIN food_waste fw ON r.id = fw.restaurant_id
-                             WHERE r.category = '{category}' AND r.id != {restaurant_id} AND fw.created_at BETWEEN '{start_date}' AND DATE_ADD('{end_date}', INTERVAL 1 DAY)
+                             WHERE r.category = '{category}' AND fw.created_at BETWEEN '{start_date}' AND DATE_ADD('{end_date}', INTERVAL 1 DAY)
                              GROUP BY r.id
                              ORDER BY total_waste ASC
                              LIMIT {num_results}'''
