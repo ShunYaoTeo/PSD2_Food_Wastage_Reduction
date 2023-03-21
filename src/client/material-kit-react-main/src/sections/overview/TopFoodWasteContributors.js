@@ -5,7 +5,6 @@ import { Grid, Button, TextField, Card, Divider, CardContent, CardHeader } from 
 import TopFoodWasteContributorsBarChart from './TopFoodWasteContributorsBarChart';
 import { fetchTopFoodWasteContributors } from 'src/api/api';
 
-
 const StyledGrid = styled(Grid)`
   ${({ theme }) => `
     &.container {
@@ -28,16 +27,16 @@ const TopFoodWasteContributors = () => {
     fetchData();
   }, []);
 
-
-
   return (
-    <Card>
-      <CardHeader title = "Top Food Waste Contributors" />
-        <Divider />
-        <CardContent>
-                {/* Display the comparison results here */}
-                {contributors.length > 0 && <TopFoodWasteContributorsBarChart data={contributors} />}
-          </CardContent>
+    <Card sx={{ height: '100%', width: '100%' }}>
+      <CardHeader title="Top Food Waste Contributors" />
+      <Divider />
+      <CardContent sx={{ height: 'calc(100% - 64px)' }}> {/* Set height for the CardContent */}
+        {/* Display the comparison results here */}
+        {contributors.length > 0 && (
+          <TopFoodWasteContributorsBarChart data={contributors} />
+        )}
+      </CardContent>
     </Card>
   );
 };

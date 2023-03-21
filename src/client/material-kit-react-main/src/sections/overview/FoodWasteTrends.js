@@ -110,7 +110,7 @@ const FoodWasteTrends = () => {
   }, [chartData, options]);
 
   return (
-    <Card>
+    <Card sx={{ height: '100%' , width: '100%'}}>
       <CardHeader title="Food Waste Trends" />
       <Divider />
       <CardContent>

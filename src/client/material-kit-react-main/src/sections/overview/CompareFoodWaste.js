@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from "@emotion/styled";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
@@ -28,9 +28,20 @@ const StyledGrid = styled(Grid)`
 
 
 const CompareFoodWaste = () => {
-  const [startDate, setStartDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(new Date("2023-01-01"));
   const [endDate, setEndDate] = useState(new Date());
   const [comparisonData, setComparisonData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const start_date = format(startDate, "yyyy-MM-dd");
+      const end_date = format(endDate, "yyyy-MM-dd");
+      const data = await fetchCompareFoodWaste(start_date, end_date);
+      setComparisonData(data);
+    }
+    fetchData();
+  }, []);
+
 
   const handleStartDateChange = (date) => {
     setStartDate(date);
@@ -52,7 +63,7 @@ const CompareFoodWaste = () => {
   };
 
   return (
-    <Card>
+    <Card sx={{ height: '100%' , width: '100%'}}>
       <CardHeader title = "Compare Food Waste" />
         <Divider />
         <CardContent>

@@ -153,6 +153,7 @@ export const fetchIndividualFoodTypeWaste = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
+    console.log(response.data)
     return response.data;
   } catch (error) {
     console.error('Error fetching User Reward history:', error);

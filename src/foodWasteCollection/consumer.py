@@ -186,7 +186,7 @@ def getUserIndividualFoodTypeWaste(restaurant_id):
                 "food_type": row[0],
                 "total_waste_weight": row[1]
             }
-        data.append(food_type_waste)
+            data.append(food_type_waste)
         return data
     else:
         return []
@@ -294,53 +294,6 @@ def getIndividualFoodTypeWaste():
     data = getUserIndividualFoodTypeWaste(restaurant_id)
     return jsonify(data),  200
 
-
-
-@server.route("/food-waste-trends", methods = ["GET"])
-def getFoodWasteTrends():
-    if not mysql.connection:
-        raise ValueError("MySQL connection not established")
-
-    userEmail = request.headers.get("userEmail")
-    restaurant_id = getRestaurantID(userEmail)
-
-    if restaurant_id is None:
-        return "[*Food_Waste_Service] No Restaurant Found For this User"
-
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-
-    data = getFoodWasteTrendsJson(restaurant_id, start_date, end_date)
-    return jsonify(data), 200
-
-
-@server.route("/compare-food-waste", methods = ["GET"])
-def compareFoodWaste():
-    if not mysql.connection:
-        raise ValueError("MySQL connection not established")
-    
-    userEmail = request.headers.get("userEmail")
-    start_date = request.args.get("start_date")
-    end_date = request.args.get("end_date")
-
-    restaurant_id, category = getRestaurantIDAndCategory(userEmail)
-    if restaurant_id is None:
-        return "[*Food_Waste_Service] No Restaurant Found For this User", 400
-
-    data = compareFoodWasteJson(restaurant_id, category, start_date, end_date)
-    return jsonify(data), 200
-
-@server.route("/top-food-waste-contributors", methods = ["GET"])
-def getTopFoodWasteContributors():
-    userEmail = request.headers.get("userEmail")
-    restaurant_id = getRestaurantID(userEmail)
-    
-    if restaurant_id is None:
-        return "[*Food_Waste_Service] No Restaurant Found For this User"
-    # Hard Coded to compare 10 restaurant for now
-    num_contributors = 10
-    data = getTopFoodWasteContributorsJson(restaurant_id, num_contributors)
-    return jsonify(data), 200
 
 
 @server.route("/getWeight", methods = ["POST"])

@@ -67,7 +67,7 @@ const WasteReductionProgress = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Card>
+      <Card sx={{ height: '100%' , width: '100%'}}>
         <CardHeader title="Waste Reduction Progress" />
         <Divider />
         <CardContent>
@@ -110,8 +110,8 @@ const WasteReductionProgress = () => {
                 renderInput={(params) => <TextField {...params} />}
               />
             </Grid>
-            <Grid item xs={12}>
-              <Button onClick={handleFetchProgress}>Get Progress</Button>
+            <Grid item xs={12} container spacing={0} direction="column" alignItems="center" justify="center">
+              <Button variant="contained" color="primary" onClick={handleFetchProgress}>Get Progress</Button>
             </Grid>
             <Grid item xs={12}>
               <Line data={chartData} options={options} />

@@ -18,6 +18,20 @@ import { Doughnut } from "react-chartjs-2";
 import { green, red, blue, orange } from "@mui/material/colors";
 import { fetchFoodWasteByCategory } from "src/api/api";
 import "chartjs-plugin-datalabels";
+import { indigo, success, info, warning, error } from '../../theme/colors';
+
+const barColors = [
+  indigo.main,
+  success.main,
+  info.main,
+  warning.main,
+  error.main,
+  indigo.light,
+  success.light,
+  info.light,
+  warning.light,
+  error.light
+];
 
 ChartJS.register(
   ArcElement,
@@ -42,7 +56,7 @@ export const FoodWasteByCategory = () => {
     datasets: [
       {
         data: foodWasteData.map((item) => item.total_waste),
-        backgroundColor: [green[500], red[500], blue[500], orange[500]],
+        backgroundColor: foodWasteData.map((_, index) => barColors[index % barColors.length]),
       },
     ],
   };
@@ -55,8 +69,9 @@ export const FoodWasteByCategory = () => {
   };
 
   return (
-    <Card>
+    <Card sx={{ height: '100%' , width: '100%'}}>
       <CardHeader title="Food Waste by Category" />
+      <Divider/>
       <CardContent/>
       <Box
         sx={{
