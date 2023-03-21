@@ -1,0 +1,16 @@
+# Cluster settings
+cluster.name: my-elasticsearch-cluster
+node.name: node-1
+node.master: true
+node.data: true
+network.host: 0.0.0.0
+
+# Data path
+path.data: /usr/share/elasticsearch/data
+
+# Log settings
+path.logs: /usr/share/elasticsearch/logs
+
+# Discovery settings
+discovery.seed_hosts: ["node1", "node2"]
+cluster.initial_master_nodes: ["node1", "node2"]

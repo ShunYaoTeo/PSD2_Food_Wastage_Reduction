@@ -56,6 +56,35 @@ def food_waste():
         return "[*Gateway Service] Store Correlation Failed", 401
 
     return "success!", 200
+
+@server.route("/claim-reward", methods=["POST"])
+def claim_reward():
+    #Checking Validation of User's JWT
+    access, err = validate.token(request)
+    print("access: ", access, ", err: ", err)
+
+    if err:
+        print("[*Gateway Service] validation failed: ", err)
+        return err
+    
+    access = json.loads(access)
+    userEmail = access['username']
+    if not userEmail:
+        return "[*Gateway Service] User Email not provided", 400
+    
+    rewardId = request.args.get('rewardId')
+
+    response = requests.post(
+        f"http://{os.environ.get('REWARDS_SVC_ADDRESS')}/claim-reward",
+        headers={"userEmail": userEmail},
+        params={'rewardId': rewardId}
+    )
+
+    if response.status_code == 200:
+        return "success!", 200
+    else:
+        return "[*Gateway Service] Claim Reward Failed", 401
+
    
 @server.route("/food-waste-by-category", methods = ["GET"])
 def getFoodWasteByCategory():
@@ -160,6 +189,42 @@ def getWasteReductionProgress():
     )
     return response.content
 
+@server.route("/food-waste-history", methods = ["GET"])
+def getFoodWasteHistory():
+    # Checking Validation of User's JWT
+    access, err = validate.token(request)
+    if err:
+        print("[*Gateway Service] valid.token.(request) failed: ", err)
+        return err
+    access = json.loads(access)
+    userEmail = access['username']
+    if not userEmail:
+        return "[*Gateway Service] User Email not provided", 400
+
+    response = requests.get(
+        f"http://{os.environ.get('FOODWASTE_SVC_ADDRESS')}/food-waste-history",
+        headers={"userEmail": userEmail},
+    )
+    return response.content
+
+@server.route("/Individual-FoodType-Waste", methods = ["GET"])
+def getIndividualFoodTypeWaste():
+    # Checking Validation of User's JWT
+    access, err = validate.token(request)
+    if err:
+        print("[*Gateway Service] valid.token.(request) failed: ", err)
+        return err
+    access = json.loads(access)
+    userEmail = access['username']
+    if not userEmail:
+        return "[*Gateway Service] User Email not provided", 400
+
+    response = requests.get(
+        f"http://{os.environ.get('FOODWASTE_SVC_ADDRESS')}/Individual-FoodType-Waste",
+        headers={"userEmail": userEmail}
+    )
+    return response.content
+
 @server.route("/points-earned-over-time", methods = ["GET"])
 def getPointsEarnedOverTime():
     # Checking Validation of User's JWT
@@ -201,6 +266,24 @@ def getRewardsStatus():
     )
     return response.content
 
+@server.route("/user-reward-history", methods = ["GET"])
+def getUserRewardsHistory():
+    # Checking Validation of User's JWT
+    access, err = validate.token(request)
+    if err:
+        print("[*Gateway Service] valid.token.(request) failed: ", err)
+        return err
+    access = json.loads(access)
+    userEmail = access['username']
+    if not userEmail:
+        return "[*Gateway Service] User Email not provided", 400
+
+    response = requests.get(
+        f"http://{os.environ.get('REWARDS_SVC_ADDRESS')}/user-reward-history",
+        headers={"userEmail": userEmail}
+    )
+    return response.content
+
 
 @server.route("/rewards", methods=["POST"])
 def rewards():
@@ -222,6 +305,7 @@ def rewards():
         return "success!", 200
     else:
         return "not authorized", 401
+    
 
 @server.route("/test")
 def test():

@@ -149,7 +149,47 @@ def getWasteReductionProgressJson(restaurant_id, old_start_date, old_end_date, n
         'waste_reduction': waste_reduction
     }
 
+def getUserFoodWasteHistory(restaurant_id):
+    if not mysql.connection:
+        raise ValueError("MySQL connection not established")
+    
+    cursor = mysql.connection.cursor()
+    
+    res = cursor.execute(f'''
+            SELECT food_type, weight, reason, donated, created_at FROM food_waste
+            WHERE restaurant_id = {restaurant_id}
+            ORDER BY created_at DESC'''
+        )   
+    if res > 0:
+        rows = cursor.fetchall()
+        data = [{'food_type': row[0], 'weight': row[1], 'reason': row[2], 'donated': row[3], 'created_at': row[4]} for row in rows]
+        return data
+    else:
+        return []
 
+def getUserIndividualFoodTypeWaste(restaurant_id):
+    if not mysql.connection:
+        raise ValueError("MySQL connection not established")
+    
+    cursor = mysql.connection.cursor()
+
+    res = cursor.execute(f'''
+            SELECT food_type, SUM(weight) FROM food_waste
+            WHERE restaurant_id = {restaurant_id}
+            GROUP BY food_type '''
+            )
+    if res > 0:
+        rows = cursor.fetchall()
+        data = []
+        for row in rows:
+            food_type_waste = {
+                "food_type": row[0],
+                "total_waste_weight": row[1]
+            }
+        data.append(food_type_waste)
+        return data
+    else:
+        return []
 
 
 @server.route("/food-waste-by-category", methods = ["GET"])
@@ -232,6 +272,75 @@ def getWasteReductionProgress():
     return jsonify(data), 200
 
 
+@server.route("/food-waste-history", methods = ["GET"])
+def getFoodWasteHistory():
+    userEmail = request.headers.get("userEmail")
+    restaurant_id = getRestaurantID(userEmail)
+
+    if restaurant_id is None:
+        return "[*Food_Waste_Service] No Restaurant Found For this User"
+    
+    data = getUserFoodWasteHistory(restaurant_id)
+    return jsonify(data), 200
+
+@server.route("/Individual-FoodType-Waste", methods = ["GET"])
+def getIndividualFoodTypeWaste():
+    userEmail = request.headers.get("userEmail")
+    restaurant_id  = getRestaurantID(userEmail)
+
+    if restaurant_id is None:
+        return "[*Food_Waste_Service] No Restaurant Found For this User"
+    
+    data = getUserIndividualFoodTypeWaste(restaurant_id)
+    return jsonify(data),  200
+
+
+
+@server.route("/food-waste-trends", methods = ["GET"])
+def getFoodWasteTrends():
+    if not mysql.connection:
+        raise ValueError("MySQL connection not established")
+
+    userEmail = request.headers.get("userEmail")
+    restaurant_id = getRestaurantID(userEmail)
+
+    if restaurant_id is None:
+        return "[*Food_Waste_Service] No Restaurant Found For this User"
+
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    data = getFoodWasteTrendsJson(restaurant_id, start_date, end_date)
+    return jsonify(data), 200
+
+
+@server.route("/compare-food-waste", methods = ["GET"])
+def compareFoodWaste():
+    if not mysql.connection:
+        raise ValueError("MySQL connection not established")
+    
+    userEmail = request.headers.get("userEmail")
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+
+    restaurant_id, category = getRestaurantIDAndCategory(userEmail)
+    if restaurant_id is None:
+        return "[*Food_Waste_Service] No Restaurant Found For this User", 400
+
+    data = compareFoodWasteJson(restaurant_id, category, start_date, end_date)
+    return jsonify(data), 200
+
+@server.route("/top-food-waste-contributors", methods = ["GET"])
+def getTopFoodWasteContributors():
+    userEmail = request.headers.get("userEmail")
+    restaurant_id = getRestaurantID(userEmail)
+    
+    if restaurant_id is None:
+        return "[*Food_Waste_Service] No Restaurant Found For this User"
+    # Hard Coded to compare 10 restaurant for now
+    num_contributors = 10
+    data = getTopFoodWasteContributorsJson(restaurant_id, num_contributors)
+    return jsonify(data), 200
 
 
 @server.route("/getWeight", methods = ["POST"])
@@ -249,6 +358,7 @@ def getWeight():
         return err
     else:
         return "success!", 200
+
 
 def main():
 

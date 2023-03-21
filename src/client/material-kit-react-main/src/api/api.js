@@ -106,9 +106,56 @@ export const fetchRewardStatus = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
+    
     return response.data;
   } catch (error) {
-    console.error('Error fetching food waste by category:', error);
+    console.error('Error fetching reward status:', error);
+    return [];
+  }
+};
+
+
+export const fetchFoodWasteHistory = async () => {
+  const token = localStorage.getItem('jwt')
+  try {
+    const response = await apiClient.get('food-waste-history', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching food waste history:', error);
+    return [];
+  }
+};
+
+export const fetchRewardHistory = async () => {
+  const token = localStorage.getItem('jwt')
+  try {
+    const response = await apiClient.get('user-reward-history', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching User Reward history:', error);
+    return [];
+  }
+};
+
+export const fetchIndividualFoodTypeWaste = async () => {
+  const token = localStorage.getItem('jwt')
+  try {
+    const response = await apiClient.get('Individual-FoodType-Waste', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching User Reward history:', error);
     return [];
   }
 };
@@ -128,7 +175,26 @@ export const fetchFoodWasteData = async (foodType, reason, donated) => {
     });
     return response.data;
   } catch (error){
-    console.error('Error Sending Request', error);
+    console.error('Error Sending Request: ', error);
     return [];
   }
 }
+
+export const claimReward = async (rewardId) => {
+  const token = localStorage.getItem("jwt");
+  try {
+    await apiClient.post(
+      `claim-reward?rewardId=${rewardId}`,
+      {}, // Pass an empty object as the request payload
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return "Successfully Claimed Reward!";
+  } catch (error) {
+    console.error("Error Claiming Reward: ", error);
+    return error;
+  }
+};

@@ -4,6 +4,9 @@ import { styled } from '@mui/material/styles';
 import { withAuthGuard } from 'src/hocs/with-auth-guard';
 import { SideNav } from './side-nav';
 import { TopNav } from './top-nav';
+import { fetchRewardStatus } from 'src/api/api';
+import UserPointsContext from 'src/contexts/user-point-context';
+import Rewards from 'src/pages/rewards';
 
 const SIDE_NAV_WIDTH = 280;
 
@@ -27,6 +30,17 @@ export const Layout = withAuthGuard((props) => {
   const { children } = props;
   const pathname = usePathname();
   const [openNav, setOpenNav] = useState(false);
+  // const [userPoints, setUserPoints] = useState(0);
+
+  // // Fetch available rewards and user rewards history data when the component mounts
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     const rewardsData = await fetchRewardStatus();
+  //     setUserPoints(rewardsData.user_points)
+  //   }
+
+  //   fetchData();
+  // }, []);
 
   const handlePathnameChange = useCallback(
     () => {
@@ -47,7 +61,7 @@ export const Layout = withAuthGuard((props) => {
 
   return (
     <>
-      <TopNav onNavOpen={() => setOpenNav(true)} />
+      <TopNav onNavOpen={() => setOpenNav(true)}/>
       <SideNav
         onClose={() => setOpenNav(false)}
         open={openNav}

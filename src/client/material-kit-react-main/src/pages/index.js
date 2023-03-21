@@ -7,6 +7,8 @@ import FoodWasteTrends from 'src/sections/overview/FoodWasteTrends';
 import CompareFoodWaste from 'src/sections/overview/CompareFoodWaste';
 import TopFoodWasteContributors from 'src/sections/overview/TopFoodWasteContributors';
 import WasteReductionProgress from 'src/sections/overview/WasteReductionProgress';
+import FoodTypeWasteWidget from 'src/sections/overview/IndividualFoodTypeWaste';
+import { fetchIndividualFoodTypeWaste } from 'src/api/api';
 
 const now = new Date();
 
@@ -14,7 +16,7 @@ const Page = () => (
   <>
     <Head>
       <title>
-        Overview | Devias Kit
+        Dashboard | Food Waste
       </title>
     </Head>
     <Box

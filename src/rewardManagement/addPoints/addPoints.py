@@ -49,7 +49,7 @@ def getPoints(message, mysql,  properties):
 
     description = f"Food Waste: {foodType} ({foodWeight}kg) - Reason: {reason} - Donated: {donated}"
 
-    # Updateing user_points_history table
+    # Updating user_points_history table
     cursor.execute(f'''
             INSERT INTO user_reward_history (user_id, points, action, description) 
             VALUES ((SELECT id FROM auth.user WHERE email = '{userEmail}'),{totalPointsGained}, 'earned', '{description}')'''

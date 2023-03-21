@@ -1,22 +1,43 @@
-import React, { useState } from 'react';
-import { useRouter } from 'next/router';
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography, Container } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography, Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { fetchFoodWasteData } from 'src/api/api';
+import { fetchFoodWasteHistory } from 'src/api/api';
 
 const RecordFoodWaste = () => {
   // State for form fields
   const [foodType, setFoodType] = useState('');
   const [reason, setReason] = useState('');
   const [donated, setDonated] = useState(false);
+  const [foodWasteHistory, setFoodWasteHistory] = useState([]);
 
   // Function to handle form submission
   const handleSubmit = async (event) => {
     event.preventDefault();
+    await fetchFoodWasteData(foodType, reason, donated)
+    console.log("Food waste data submitted");
+
+    // Clear the form
+    setFoodType("");
+    setReason("");
+    setDonated(false);
+  
+    // Refetch food waste history data
+    const data = await fetchFoodWasteHistory();
+    setFoodWasteHistory(data);
     
-      const response = fetchFoodWasteData(foodType, reason, donated)
-      console.log(response)
   };
+
+   // Fetch food waste history data when the component mounts
+   useEffect(() => {
+    async function fetchData() {
+      const data = await fetchFoodWasteHistory();
+      setFoodWasteHistory(data);
+      
+    }
+
+    fetchData();
+  }, []);
 
 
   return (
@@ -63,6 +84,32 @@ const RecordFoodWaste = () => {
             Submit
           </Button>
         </Box>
+        </Container>
+        <Container style={{ marginTop: "2rem" }}>
+        <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Food Type</TableCell>
+              <TableCell>Food Weight</TableCell>
+              <TableCell>Reason</TableCell>
+              <TableCell>Donated</TableCell>
+              <TableCell>Date</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {foodWasteHistory.map((waste, index) => (
+              <TableRow key={index}>
+                <TableCell>{waste.food_type}</TableCell>
+                <TableCell>{waste.weight} kg</TableCell>
+                <TableCell>{waste.reason}</TableCell>
+                <TableCell>{waste.donated ? 'Yes' : 'No'}</TableCell>
+                <TableCell>{new Date(waste.created_at).toLocaleString()}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
       </Container>
     </DashboardLayout>
   );

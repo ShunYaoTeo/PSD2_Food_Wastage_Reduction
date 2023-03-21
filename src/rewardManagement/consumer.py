@@ -77,6 +77,58 @@ def getRewardsStatusJson(user_id):
         "user_points": user_points,
         "available_rewards": available_rewards
     }
+
+def claimUserReward(userID, rewardId):
+    cursor = mysql.connection.cursor()
+
+    # Get User_Points
+    res = cursor.execute("SELECT points FROM rewards.user_points WHERE user_id = %s", (userID,))
+    if res > 0:
+        current_user_points = cursor.fetchone()[0]
+    else:
+        return ValueError("UserPoints is 0"), 400
+
+    # Get RewardId Pointvalue
+    res = cursor.execute("SELECT name, point_value FROM rewards.rewards WHERE id = %s", (rewardId,))
+    if res > 0:
+        result = cursor.fetchone()
+        reward_name, reward_point_value = result[0], result[1]
+
+    else:
+        return ValueError("Invalid reward id"), 400
+    
+    # Check if user has enought points to claim rewards
+    if current_user_points < reward_point_value:
+        return ValueError("Not enought points"), 400
+
+    # Update deduction of user_points
+    cursor.execute(f"UPDATE user_points SET points = points - {reward_point_value} WHERE user_id = {userID}")
+    mysql.connection.commit()
+    print("[*Rewards_Service] User Points Deducted")
+
+    description = f"Rewards Claimed: {reward_name}"
+
+    # Updating user_points_history table
+    cursor.execute(f'''
+            INSERT INTO user_reward_history (user_id, reward_id, points, action, description)
+            VALUES ({userID}, {rewardId}, {reward_point_value}, 'redeemed', '{description}')'''
+    )
+    mysql.connection.commit()
+    print("[*Rewards_Service] User Point History Updated")
+
+def getRewardsHistory(user_id):
+    cursor = mysql.connection.cursor()
+
+    res = cursor.execute(f'''SELECT reward_id, points, action, description, timestamp FROM user_reward_history 
+                         WHERE user_id = {user_id} 
+                         ORDER BY timestamp DESC'''
+                         )
+    if res > 0:
+        rows = cursor.fetchall()
+        data = [{'reward_id': row[0], 'points': row[1], 'action': row[2], 'description': row[3], 'timestamp': row[4]} for row in rows]
+        return data
+    else:
+        return []
     
     
 @server.route("/points-earned-over-time", methods = ["GET"])
@@ -108,9 +160,40 @@ def getRewardsStatus():
     rewards_data = getRewardsStatusJson(user_id)
     return jsonify(rewards_data), 200
 
+@server.route("/user-reward-history", methods=["GET"])
+def getUserRewardsHistory():
+    userEmail = request.headers.get("userEmail")
+    user_id = getUserID(userEmail)
+    
+    if user_id is None:
+        return "[*Rewards_Service] No User Found", 400
+
+    rewards_history = getRewardsHistory(user_id)
+    return jsonify(rewards_history), 200
+
+@server.route("/claim-reward", methods = ["POST"])
+def claimReward():
+    if not mysql.connection:
+        raise ValueError("MySQL connection not established")
+
+    userEmail = request.headers.get("userEmail")
+    userID = getUserID(userEmail)
+    if userID is None:
+        return "[*Rewards_Service] No User Found", 400
+
+    rewardId = request.args.get('rewardId')
+
+    err = claimUserReward(userID, rewardId)
+    
+    if err:
+        return err
+    else:
+        return "success!", 200
+    
+    
 
 
-@server.route("/addPoints",methods = ["POST"])
+@server.route("/addPoints", methods = ["POST"])
 def getPoints():
     if not mysql.connection:
         raise ValueError("MySQL connection not established")
@@ -125,7 +208,6 @@ def getPoints():
     else:
         return "success!", 200
     
-
 
 
 def main():

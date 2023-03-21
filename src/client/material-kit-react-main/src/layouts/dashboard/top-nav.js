@@ -3,6 +3,7 @@ import BellIcon from '@heroicons/react/24/solid/BellIcon';
 import UsersIcon from '@heroicons/react/24/solid/UsersIcon';
 import Bars3Icon from '@heroicons/react/24/solid/Bars3Icon';
 import MagnifyingGlassIcon from '@heroicons/react/24/solid/MagnifyingGlassIcon';
+import UserPointsContext from 'src/contexts/user-point-context';
 import {
   Avatar,
   Badge,
@@ -11,11 +12,13 @@ import {
   Stack,
   SvgIcon,
   Tooltip,
-  useMediaQuery
+  useMediaQuery,
+  Typography
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { usePopover } from 'src/hooks/use-popover';
 import { AccountPopover } from './account-popover';
+import { useContext } from 'react';
 
 const SIDE_NAV_WIDTH = 280;
 const TOP_NAV_HEIGHT = 64;
@@ -24,6 +27,8 @@ export const TopNav = (props) => {
   const { onNavOpen } = props;
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
   const accountPopover = usePopover();
+  const { userPoints } = useContext(UserPointsContext);
+
 
   return (
     <>
@@ -78,6 +83,14 @@ export const TopNav = (props) => {
             direction="row"
             spacing={2}
           >
+            <Typography
+            variant="subtitle1"
+            noWrap
+            component="div"
+            sx={{ marginRight: 2 }}
+          >
+            Points: {userPoints}
+          </Typography>
             <Tooltip title="Contacts">
               <IconButton>
                 <SvgIcon fontSize="small">
