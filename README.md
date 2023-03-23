@@ -50,9 +50,13 @@ The project consists of the following microservices:
 4. Access the Kibana dashboard at [localhost:5601](http://localhost:5601)
 
 ## Contributors
-1	MATHAN S/O NANTHABALA	2100605
+1	MATHAN S/O NANTHABALA	2100605 
+<br/>
 2	TONG KAH JUN	2101694
+<br/>
 3	AARON POH ZHENG RONG	2101557
+<br/>
 4	TEO SHUN YAO	2101104
+<br/>
 5	ALASTAIR LEE MING HAN	2101034
 
