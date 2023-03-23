@@ -9,6 +9,6 @@ data:
   MYSQL_PORT: "3306"
   GATEWAY_FOODWASTE_QUEUE: "gateway_foodwaste"
   FOODWASTE_REWARD_QUEUE: "foodwaste_reward"
-  RASPBERRY_PI_ADDRESS: "pi@aaronpi:8500"
+  RASPBERRY_PI_ADDRESS: "172.20.10.2:8500"
   FOODWASTE_SVC_ADDRESS: "foodwaste-psd2:8000"
   AUTH_SVC_ADDRESS: "auth-psd2:5000"

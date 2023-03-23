@@ -8,10 +8,23 @@ import { fetchWasteReductionProgress } from 'src/api/api';
 import { format } from "date-fns";
 
 const WasteReductionProgress = () => {
-  const [oldDateRange, setOldDateRange] = useState([null, null]);
-  const [newDateRange, setNewDateRange] = useState([null, null]);
+  const [oldDateRange, setOldDateRange] = useState([new Date("2023-01-01"), new Date("2023-01-01")]);
+  const [newDateRange, setNewDateRange] = useState([new Date(), new Date()]);
   const [progressData, setProgressData] = useState(null);
   const chartCanvasRef = useRef(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const oldStartDate = format(oldDateRange[0], "yyyy-MM-dd");
+      const oldEndDate = format(oldDateRange[1], "yyyy-MM-dd");
+      const newStartDate = format(newDateRange[0], "yyyy-MM-dd");
+      const newEndDate = format(newDateRange[1], "yyyy-MM-dd");
+      const data = await fetchWasteReductionProgress(oldStartDate, oldEndDate, newStartDate, newEndDate);
+      setProgressData(data);
+    }
+    fetchData();
+  }, []);
+
 
   const handleFetchProgress = async () => {
     if (!oldDateRange[0] || !oldDateRange[1] || !newDateRange[0] || !newDateRange[1]) {

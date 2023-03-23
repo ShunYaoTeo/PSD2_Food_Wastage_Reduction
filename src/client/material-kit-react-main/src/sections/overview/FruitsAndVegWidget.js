@@ -40,7 +40,7 @@ const FruitsAndVegWidget = () => {
               {foodType}
             </Typography>
             <Typography variant="h4">
-              {weight} kg
+              {weight.toFixed(1)} kg
             </Typography>
           </Stack>
           <Avatar

@@ -31,9 +31,19 @@ ChartJS.register(LinearScale, PointElement, Tooltip, Legend, TimeScale ,LineElem
 
 const FoodWasteTrends = () => {
   const [foodWasteTrendsData, setFoodWasteTrendsData] = useState([]);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState(new Date("2023-01-01"));
+  const [endDate, setEndDate] = useState(new Date());
   const chartCanvasRef = useRef(null); // declare chartCanvasRef
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const start_date = format(startDate, "yyyy-MM-dd");
+      const end_date = format(endDate, "yyyy-MM-dd");
+      const data = await fetchFoodWasteTrends(start_date, end_date);
+      setFoodWasteTrendsData(data);
+    }
+    fetchData();
+  }, []);
   
   const handleStartDateChange = (date) => {
     setStartDate(date);

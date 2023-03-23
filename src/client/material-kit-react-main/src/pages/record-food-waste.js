@@ -22,9 +22,14 @@ const RecordFoodWaste = () => {
     setReason("");
     setDonated(false);
   
-    // Refetch food waste history data
-    const data = await fetchFoodWasteHistory();
-    setFoodWasteHistory(data);
+    // Add a delay before fetching the updated FoodWasteHistory data
+    setTimeout(async () => {
+      // Refetch food waste history data
+      const data = await fetchFoodWasteHistory();
+      console.log(data)
+      setFoodWasteHistory(data);
+  }, 1000); // 1000 ms (1 second) delay before fetching the updated data
+
     
   };
 

@@ -24,17 +24,17 @@ def getWeight(message, mysql, channel, properties):
     ####### Code to get Weight Data from Raspberry################
 
     # As for now, gets a random weight between 1kg and 50kg
-    tempData = random.randint(1, 50)
-    formattedData= float(tempData)
+    # tempData = random.randint(1, 50)
+    # formattedData= float(tempData)
 
 
-    # response = requests.get(
-    #         f"http://{os.environ.get('RASPBERRY_PI_ADDRESS')}/weight",
-    #     )
-    # tempData = response.content
-    # tempData = json.load(tempData)
-    # weight = tempData['weight']
-    # formattedData = float(weight)
+    response = requests.get(
+            f"http://{os.environ.get('RASPBERRY_PI_ADDRESS')}/weight",
+        )
+    tempData = response.content
+    tempData = json.loads(tempData)
+    weight = tempData['weight']
+    formattedData = float(weight)
     ##############################################################
 
     # Get Restaurant id of User
