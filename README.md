@@ -28,6 +28,14 @@ The project consists of the following microservices:
 - Make sure to have Minikube and kubectl installed.
 - Git pull the project from the GitHub repository: [https://github.com/ShunYaoTeo/PSD2_Food_Wastage_Reduction](https://github.com/ShunYaoTeo/PSD2_Food_Wastage_Reduction)
 
+### Initializing the Database
+
+Before running the microservices, you need to execute the `init.sql` files in the following order:
+
+1. Auth
+2. FoodWasteCollection
+3. RewardManagement
+
 ### Running the Microservices
 
 1. Run: `start minikube`
@@ -48,6 +56,7 @@ The project consists of the following microservices:
 2. Open another command line window and execute: `kubectl port-forward service/es-master-service 9200:9200 -n elk`
 3. Open another command line window and execute: `kubectl port-forward service/kibana-service 5601:5601 -n elk`
 4. Access the Kibana dashboard at [localhost:5601](http://localhost:5601)
+
 
 ## Contributors
 1	MATHAN S/O NANTHABALA	2100605 
