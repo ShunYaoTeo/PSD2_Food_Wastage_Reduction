@@ -53,9 +53,13 @@ Before running the microservices, you need to execute the `init.sql` files in th
 ### Running the ELK Stack for Logging and Monitoring
 
 1. Change directory to the ELK directory: `cd ELK`
-2. Open another command line window and execute: `kubectl port-forward service/es-master-service 9200:9200 -n elk`
-3. Open another command line window and execute: `kubectl port-forward service/kibana-service 5601:5601 -n elk`
-4. Access the Kibana dashboard at [localhost:5601](http://localhost:5601)
+2. Run Elasticsearch pod by running `kubectl apply -f es-deployment-service.yaml`
+3. Run Kibana pod by running `kubectl apply -f kibana-deployment-service.yaml`
+4. Run nginx-log-generator pod by running `kubectl apply -f nginx-log-generator-deployment.yaml`
+5. Run Filebeat pod by running `kubectl apply -f filebeat-deployment.yaml`
+6. Open another command line window and execute: `kubectl port-forward service/es-master-service 9200:9200 -n elk`
+7. Open another command line window and execute: `kubectl port-forward service/kibana-service 5601:5601 -n elk`
+8. Access the Kibana dashboard at [localhost:5601](http://localhost:5601)
 
 
 ## Contributors
