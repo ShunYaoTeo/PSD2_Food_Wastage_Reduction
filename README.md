@@ -43,6 +43,8 @@ Before running the microservices, you need to execute the `init.sql` files in th
    1. Change directory to the service's manifest directory: `cd <service>/manifest`
    2. Run: `kubectl apply -f ./`
 3. Check if the services are running using K9S: `k9s`
+4. Finally, enable gateway and rabbitmq connection with `minikube tunnel` on another commandline.
+5. View rabbitMQ manage dashboard at: http://rabbitmq-manager.com/
 
 ### Running the React Website
 
